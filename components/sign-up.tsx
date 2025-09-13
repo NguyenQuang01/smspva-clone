@@ -11,23 +11,44 @@ export function SignUp() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     try {
-      // Xử lý đăng ký ở đây
       const response = await apiServices.post("users/register", {
-        username: "test",
-        email: "test@example.com",
-        password: "password",
+        username: formData.username,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
       });
 
       console.log("Sign up successful:", response.data);
       // Redirect về trang chính sau khi đăng ký thành công
       router.push("/");
-    } catch (error) {
-      console.error("Sign up error:", error);
+    } catch (err: any) {
+      console.error("Sign up error:", err);
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -38,23 +59,43 @@ export function SignUp() {
       <form
         onSubmit={handleSignUp}
         className="space-y-6">
+        {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>}
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">First Name</label>
+            <Input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleInputChange}
+              className="w-full bg-card border-border text-foreground"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Last Name</label>
+            <Input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              className="w-full bg-card border-border text-foreground"
+              required
+            />
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium mb-2">Username</label>
           <Input
             type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleInputChange}
             className="w-full bg-card border-border text-foreground"
+            required
           />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">E-mail</label>
-          <Input
-            type="email"
-            className="w-full bg-card border-border text-foreground"
-          />
-          <p className="text-yellow-400 text-sm mt-2">
-            ⚠️ We recommend using a real email address for account recovery
-          </p>
         </div>
 
         <div>
@@ -62,7 +103,11 @@ export function SignUp() {
           <div className="relative">
             <Input
               type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
               className="w-full bg-card border-border text-foreground pr-10"
+              required
             />
             <button
               type="button"
@@ -100,8 +145,9 @@ export function SignUp() {
 
         <Button
           type="submit"
-          className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3">
-          Sign Up
+          disabled={isLoading}
+          className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 disabled:opacity-50">
+          {isLoading ? "Creating Account..." : "Sign Up"}
         </Button>
       </form>
     </div>

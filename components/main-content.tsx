@@ -1,9 +1,16 @@
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Star, Users, Shield, Globe, Zap, Phone, MessageSquare, Smartphone } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Star, Users, Shield, Globe, Zap, Phone, MessageSquare, Smartphone } from "lucide-react";
+import { OrdersTable } from "@/components/orders-table";
 
 export function MainContent() {
   return (
     <div className="flex-1 overflow-y-auto scroll-smooth">
+      {/* Orders Section */}
+      <div className="px-8 py-12">
+        <div className="max-w-6xl">
+          <OrdersTable />
+        </div>
+      </div>{" "}
       {/* Hero Section */}
       <div className="px-8 py-12">
         <div className="max-w-4xl">
@@ -21,7 +28,10 @@ export function MainContent() {
             <div className="flex items-center space-x-2">
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  <Star
+                    key={i}
+                    className="w-5 h-5 fill-yellow-400 text-yellow-400"
+                  />
                 ))}
               </div>
               <span className="text-sm text-muted-foreground">4.8/5</span>
@@ -43,7 +53,6 @@ export function MainContent() {
           </div>
         </div>
       </div>
-
       {/* How to Use Section */}
       <div className="px-8 py-12 bg-card/50">
         <div className="max-w-4xl">
@@ -86,7 +95,6 @@ export function MainContent() {
           </div>
         </div>
       </div>
-
       {/* Features Section */}
       <div className="px-8 py-12">
         <div className="max-w-4xl">
@@ -153,7 +161,6 @@ export function MainContent() {
           </div>
         </div>
       </div>
-
       {/* CTA Section */}
       <div className="px-8 py-12 bg-card/50">
         <div className="max-w-4xl text-center">
@@ -167,5 +174,5 @@ export function MainContent() {
         </div>
       </div>
     </div>
-  )
+  );
 }
