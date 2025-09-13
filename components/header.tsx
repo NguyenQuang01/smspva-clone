@@ -1,21 +1,66 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Globe, ChevronDown } from "lucide-react";
+import { Globe, ChevronDown, User, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export function Header() {
   const pathname = usePathname();
+  const [user, setUser] = useState<any>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+
+  useEffect(() => {
+    // Kiểm tra trạng thái đăng nhập khi component mount
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+
+    if (token && userData) {
+      setUser(JSON.parse(userData));
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  // Đóng dropdown khi click bên ngoài
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showLangDropdown || showUserDropdown) {
+        setShowLangDropdown(false);
+        setShowUserDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showLangDropdown, showUserDropdown]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setIsLoggedIn(false);
+    window.location.href = "/";
+  };
+
   return (
-    <header className="bg-card border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4">
+    <header
+      className="bg-card border-b border-border sticky top-0 z-50 relative"
+      style={{ overflow: "visible" }}>
+      <div
+        className="container mx-auto px-4"
+        style={{ overflow: "visible" }}>
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
             <div className="flex items-center">
@@ -109,48 +154,83 @@ export function Header() {
             </nav>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center space-x-2 text-muted-foreground hover:text-primary">
-                  <Globe className="w-4 h-4" />
-                  <span className="text-sm">English</span>
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-40">
-                <DropdownMenuItem>English</DropdownMenuItem>
-                <DropdownMenuItem>Русский</DropdownMenuItem>
-                <DropdownMenuItem>Español</DropdownMenuItem>
-                <DropdownMenuItem>Français</DropdownMenuItem>
-                <DropdownMenuItem>Deutsch</DropdownMenuItem>
-                <DropdownMenuItem>中文</DropdownMenuItem>
-                <DropdownMenuItem>日本語</DropdownMenuItem>
-                <DropdownMenuItem>한국어</DropdownMenuItem>
-                <DropdownMenuItem>Português</DropdownMenuItem>
-                <DropdownMenuItem>Italiano</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Link href="/sign-up">
+          <div className="flex items-center space-x-4 relative">
+            <div className="relative">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-foreground hover:text-primary">
-                Sign Up
+                className="flex items-center space-x-2 text-muted-foreground hover:text-primary"
+                onClick={() => setShowLangDropdown(!showLangDropdown)}>
+                <Globe className="w-4 h-4" />
+                <span className="text-sm">English</span>
+                <ChevronDown className="w-3 h-3" />
               </Button>
-            </Link>
-            <Link href="/sign-in">
-              <Button
-                size="sm"
-                className="bg-primary hover:bg-primary/90">
-                Sign In
-              </Button>
-            </Link>
+              {showLangDropdown && (
+                <div className="absolute right-0 top-full mt-1 w-40 bg-white border shadow-lg rounded-md z-50">
+                  <div className="py-1">
+                    <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">English</div>
+                    <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">Русский</div>
+                    <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">Español</div>
+                    <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">Français</div>
+                    <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">Deutsch</div>
+                    <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">中文</div>
+                    <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">日本語</div>
+                    <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">한국어</div>
+                    <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">Português</div>
+                    <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">Italiano</div>
+                  </div>
+                </div>
+              )}
+            </div>
+            {isLoggedIn ? (
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-2 text-foreground hover:text-primary"
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}>
+                  <User className="w-4 h-4" />
+                  <span className="text-sm">{user}</span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+                {showUserDropdown && (
+                  <div className="absolute right-0 top-full mt-1 w-48 bg-white border shadow-lg rounded-md z-50">
+                    <div className="py-1">
+                      <div className="flex items-center space-x-2 px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">
+                        <User className="w-4 h-4" />
+                        <span>Profile</span>
+                      </div>
+                      <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">Settings</div>
+                      <div className="border-t my-1"></div>
+                      <div
+                        className="flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer"
+                        onClick={handleLogout}>
+                        <LogOut className="w-4 h-4" />
+                        <span>Logout</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link href="/sign-up">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-foreground hover:text-primary">
+                    Sign Up
+                  </Button>
+                </Link>
+                <Link href="/sign-in">
+                  <Button
+                    size="sm"
+                    className="bg-primary hover:bg-primary/90">
+                    Sign In
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

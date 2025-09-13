@@ -33,7 +33,15 @@ export function SignIn() {
     try {
       const response = await apiServices.post("/users/login", formData);
       console.log("Login successful:", response.data);
-      router.push("/");
+
+      // Lưu thông tin user và token vào localStorage
+      if (response.data) {
+        localStorage.setItem("token", response.data.accessToken);
+        localStorage.setItem("user", JSON.stringify(response.data.username));
+      }
+
+      // Reload trang để cập nhật header
+      window.location.href = "/";
     } catch (err: any) {
       console.error("Login error:", err);
       setError(err.response?.data?.message || "Login failed. Please try again.");
