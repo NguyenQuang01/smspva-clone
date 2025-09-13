@@ -125,7 +125,7 @@ export function Sidebar() {
   };
 
   return (
-    <div className="w-[480px] bg-sidebar border-r border-sidebar-border h-screen flex flex-col">
+    <div className="w-[480px] bg-sidebar border-b border-l border-r border-sidebar-border h-screen flex flex-col rounded-b-2xl k">
       {/* Service Selection */}
       <div className="p-6 border-b border-sidebar-border flex-shrink-0">
         <h3 className="text-sm font-medium text-sidebar-foreground mb-4 uppercase tracking-wide">Select service</h3>
@@ -150,15 +150,15 @@ export function Sidebar() {
                       : "text-gray-500 hover:bg-gray-50 hover:text-gray-600 border  hover:border-gray-200"
                   }`}>
                   <div className="flex items-center space-x-2 w-full">
-                    {/* <Image
-                      src={apiUrl + service.image}
+                    <Image
+                      src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/apple/apple-original.svg"}
+                      // src={apiUrl + service.image}
                       alt={service.text}
                       width={20}
                       height={20}
-                      className="flex-shrink-0"
-                    /> */}
-                    🔔
-                    <span className="text-center leading-tight font-medium truncate flex-1 min-w-0 text-sm">
+                      className="flex-shrink-0 "
+                    />
+                    <span className="text-left leading-tight font-medium truncate flex-1 min-w-0 text-sm">
                       {service.text}
                     </span>
                   </div>
