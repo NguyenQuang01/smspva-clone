@@ -31,7 +31,7 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                  className={`text-sm font-medium transition-colors p-2 h-auto ${
                     pathname === "/" ? "text-primary" : "text-muted-foreground hover:text-primary"
                   }`}>
                   Activations
@@ -41,7 +41,7 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                  className={`text-sm font-medium transition-colors p-2 h-auto ${
                     pathname === "/rent-numbers" ? "text-primary" : "text-muted-foreground hover:text-primary"
                   }`}>
                   Rentnumbers
@@ -51,7 +51,7 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                  className={`text-sm font-medium transition-colors p-2 h-auto ${
                     pathname === "/hq-proxy" ? "text-primary" : "text-muted-foreground hover:text-primary"
                   }`}>
                   <span className="relative">
@@ -64,7 +64,7 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                  className={`text-sm font-medium transition-colors p-2 h-auto ${
                     pathname === "/partnership" ? "text-primary" : "text-muted-foreground hover:text-primary"
                   }`}>
                   Partnership
@@ -74,7 +74,7 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                  className={`text-sm font-medium transition-colors p-2 h-auto ${
                     pathname === "/news" ? "text-primary" : "text-muted-foreground hover:text-primary"
                   }`}>
                   News
@@ -84,7 +84,7 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                  className={`text-sm font-medium transition-colors p-2 h-auto ${
                     pathname === "/help" ? "text-primary" : "text-muted-foreground hover:text-primary"
                   }`}>
                   Help
@@ -94,7 +94,7 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                  className={`text-sm font-medium transition-colors p-2 h-auto ${
                     pathname === "/referral-program" ? "text-primary" : "text-muted-foreground hover:text-primary"
                   }`}>
                   Referralprogram
@@ -103,7 +103,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-sm font-medium transition-colors p-0 h-auto text-muted-foreground hover:text-primary">
+                className="text-sm font-medium transition-colors p-2 h-auto text-muted-foreground hover:text-primary">
                 API
               </Button>
             </nav>
