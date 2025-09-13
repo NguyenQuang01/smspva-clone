@@ -37,6 +37,7 @@ export function SignIn() {
       // Lưu thông tin user và token vào localStorage
       if (response.data) {
         localStorage.setItem("token", response.data.accessToken);
+        localStorage.setItem("refreshToken", response.data.refreshToken);
         localStorage.setItem("user", JSON.stringify(response.data.username));
       }
 
