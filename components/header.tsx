@@ -72,7 +72,7 @@ export function Header() {
               />
             </div>
 
-            <nav className="hidden md:flex items-center space-x-6">
+            <nav className="hidden md:flex items-center space-x-2">
               <Link href="/">
                 <Button
                   variant="ghost"
