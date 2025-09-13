@@ -1,15 +1,18 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Globe, ChevronDown } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button";
+import { Globe, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-interface HeaderProps {
-  activeTab: string
-  setActiveTab: (tab: string) => void
-}
-
-export function Header({ activeTab, setActiveTab }: HeaderProps) {
+export function Header() {
+  const pathname = usePathname();
   return (
     <header className="bg-card border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -24,87 +27,83 @@ export function Header({ activeTab, setActiveTab }: HeaderProps) {
             </div>
 
             <nav className="hidden md:flex items-center space-x-6">
+              <Link href="/">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                    pathname === "/" ? "text-primary" : "text-muted-foreground hover:text-primary"
+                  }`}>
+                  Activations
+                </Button>
+              </Link>
+              <Link href="/rent-numbers">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                    pathname === "/rent-numbers" ? "text-primary" : "text-muted-foreground hover:text-primary"
+                  }`}>
+                  Rentnumbers
+                </Button>
+              </Link>
+              <Link href="/hq-proxy">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                    pathname === "/hq-proxy" ? "text-primary" : "text-muted-foreground hover:text-primary"
+                  }`}>
+                  <span className="relative">
+                    <span className="text-red-500 relative -top-0.5 text-xs font-bold">HQ</span>
+                    <span>proxy</span>
+                  </span>
+                </Button>
+              </Link>
+              <Link href="/partnership">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                    pathname === "/partnership" ? "text-primary" : "text-muted-foreground hover:text-primary"
+                  }`}>
+                  Partnership
+                </Button>
+              </Link>
+              <Link href="/news">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                    pathname === "/news" ? "text-primary" : "text-muted-foreground hover:text-primary"
+                  }`}>
+                  News
+                </Button>
+              </Link>
+              <Link href="/help">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                    pathname === "/help" ? "text-primary" : "text-muted-foreground hover:text-primary"
+                  }`}>
+                  Help
+                </Button>
+              </Link>
+              <Link href="/referral-program">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`text-sm font-medium transition-colors p-0 h-auto ${
+                    pathname === "/referral-program" ? "text-primary" : "text-muted-foreground hover:text-primary"
+                  }`}>
+                  Referralprogram
+                </Button>
+              </Link>
               <Button
                 variant="ghost"
                 size="sm"
-                className={`text-sm font-medium transition-colors p-0 h-auto ${
-                  activeTab === "activations" ? "text-primary" : "text-muted-foreground hover:text-primary"
-                }`}
-                onClick={() => setActiveTab("activations")}
-              >
-                Activations
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`text-sm font-medium transition-colors p-0 h-auto ${
-                  activeTab === "rent-numbers" ? "text-primary" : "text-muted-foreground hover:text-primary"
-                }`}
-                onClick={() => setActiveTab("rent-numbers")}
-              >
-                Rentnumbers
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`text-sm font-medium transition-colors p-0 h-auto ${
-                  activeTab === "hq-proxy" ? "text-primary" : "text-muted-foreground hover:text-primary"
-                }`}
-                onClick={() => setActiveTab("hq-proxy")}
-              >
-                <span className="relative">
-                  <span className="text-red-500 relative -top-0.5 text-xs font-bold">HQ</span>
-                  <span>proxy</span>
-                </span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`text-sm font-medium transition-colors p-0 h-auto ${
-                  activeTab === "partnership" ? "text-primary" : "text-muted-foreground hover:text-primary"
-                }`}
-                onClick={() => setActiveTab("partnership")}
-              >
-                Partnership
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`text-sm font-medium transition-colors p-0 h-auto ${
-                  activeTab === "news" ? "text-primary" : "text-muted-foreground hover:text-primary"
-                }`}
-                onClick={() => setActiveTab("news")}
-              >
-                News
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`text-sm font-medium transition-colors p-0 h-auto ${
-                  activeTab === "help" ? "text-primary" : "text-muted-foreground hover:text-primary"
-                }`}
-                onClick={() => setActiveTab("help")}
-              >
-                Help
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`text-sm font-medium transition-colors p-0 h-auto ${
-                  activeTab === "referral-program" ? "text-primary" : "text-muted-foreground hover:text-primary"
-                }`}
-                onClick={() => setActiveTab("referral-program")}
-              >
-                Referralprogram
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`text-sm font-medium transition-colors p-0 h-auto ${
-                  activeTab === "api" ? "text-primary" : "text-muted-foreground hover:text-primary"
-                }`}
-                onClick={() => setActiveTab("api")}
-              >
+                className="text-sm font-medium transition-colors p-0 h-auto text-muted-foreground hover:text-primary">
                 API
               </Button>
             </nav>
@@ -116,14 +115,15 @@ export function Header({ activeTab, setActiveTab }: HeaderProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex items-center space-x-2 text-muted-foreground hover:text-primary"
-                >
+                  className="flex items-center space-x-2 text-muted-foreground hover:text-primary">
                   <Globe className="w-4 h-4" />
                   <span className="text-sm">English</span>
                   <ChevronDown className="w-3 h-3" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuContent
+                align="end"
+                className="w-40">
                 <DropdownMenuItem>English</DropdownMenuItem>
                 <DropdownMenuItem>Русский</DropdownMenuItem>
                 <DropdownMenuItem>Español</DropdownMenuItem>
@@ -136,20 +136,24 @@ export function Header({ activeTab, setActiveTab }: HeaderProps) {
                 <DropdownMenuItem>Italiano</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-foreground hover:text-primary"
-              onClick={() => setActiveTab("sign-up")}
-            >
-              Sign Up
-            </Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => setActiveTab("sign-in")}>
-              Sign In
-            </Button>
+            <Link href="/sign-up">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-foreground hover:text-primary">
+                Sign Up
+              </Button>
+            </Link>
+            <Link href="/sign-in">
+              <Button
+                size="sm"
+                className="bg-primary hover:bg-primary/90">
+                Sign In
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
     </header>
-  )
+  );
 }

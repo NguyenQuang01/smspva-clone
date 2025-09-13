@@ -1,8 +1,9 @@
 import axios from "axios";
 
+export const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://14.225.205.10:9090/api/";
 // Create instance
 const apiConfig = axios.create({
-  baseURL: "http://14.225.205.10:9090",
+  baseURL: apiUrl,
   headers: {
     "Content-Type": "application/json",
   },
