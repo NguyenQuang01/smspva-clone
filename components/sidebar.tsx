@@ -123,6 +123,7 @@ export function Sidebar() {
   };
 
   const handleServiceClick = (service: any) => {
+    console.log("🚀 ~ handleServiceClick ~ service:", service);
     setSelectedService(service);
   };
 
@@ -256,7 +257,8 @@ export function Sidebar() {
         isOpen={showAddFundsModal}
         onClose={() => setShowAddFundsModal(false)}
         pricePerDay={selectedCountry?.pricePerDay || 0.05}
-        countryName={selectedCountry?.name || "Service"}
+        countryName={selectedCountry?.countryCode}
+        serviceCode={selectedService?.code}
       />
     </div>
   );

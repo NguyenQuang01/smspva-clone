@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import apiServices from "@/services/axios";
 
 export function Header() {
   const pathname = usePathname();
@@ -19,6 +20,37 @@ export function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [userBalance, setUserBalance] = useState<string>("0.00");
+  const [loading, setLoading] = useState(false);
+
+  // Fetch user info from API
+  const fetchUserInfo = async () => {
+    try {
+      setLoading(true);
+      const response = await apiServices.get("/users/info");
+
+      if (response.data) {
+        setUser(response.data);
+        setUserBalance(response.data.balanceAmount || "0.00");
+        setIsLoggedIn(true);
+
+        // Update localStorage with fresh data
+        localStorage.setItem("user", JSON.stringify(response.data));
+      }
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      // Fallback to localStorage data
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        setUserBalance(parsedUser.balanceAmount || "0.00");
+        setIsLoggedIn(true);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Kiểm tra trạng thái đăng nhập khi component mount
@@ -26,8 +58,13 @@ export function Header() {
     const userData = localStorage.getItem("user");
 
     if (token && userData) {
-      setUser(JSON.parse(userData));
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      setUserBalance(parsedUser.balance || "0.00");
       setIsLoggedIn(true);
+
+      // Fetch fresh user info from API
+      fetchUserInfo();
     }
   }, []);
 
@@ -65,6 +102,7 @@ export function Header() {
       setUser(null);
       setIsLoggedIn(false);
       setShowUserDropdown(false);
+      setUserBalance("0.00");
 
       console.log("Logout successful, redirecting...");
 
@@ -206,16 +244,18 @@ export function Header() {
               )}
             </div>
             {isLoggedIn ? (
-              <div className="relative">
+              <div className="relative flex items-center ">
+                <div className="text-sm font-semibold text-green-600">${loading ? "..." : userBalance}</div>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="flex items-center space-x-2 text-foreground hover:text-primary"
                   onClick={() => setShowUserDropdown(!showUserDropdown)}>
                   <User className="w-4 h-4" />
-                  <span className="text-sm">{user}</span>
+                  <span className="text-sm">{user?.username || user?.name || "User"}</span>
                   <ChevronDown className="w-3 h-3" />
                 </Button>
+
                 {showUserDropdown && (
                   <div className="absolute right-0 top-full mt-1 w-48 bg-white border shadow-lg rounded-md z-50 dropdown-content">
                     <div className="py-1">

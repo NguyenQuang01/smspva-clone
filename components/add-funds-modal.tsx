@@ -3,18 +3,22 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, CreditCard, DollarSign } from "lucide-react";
+import { X, CreditCard, DollarSign, Loader2 } from "lucide-react";
+import apiServices from "@/services/axios";
 
 interface AddFundsModalProps {
   isOpen: boolean;
   onClose: () => void;
   pricePerDay?: number;
   countryName?: string;
+  serviceCode?: string;
 }
 
-export function AddFundsModal({ isOpen, onClose, pricePerDay = 0.05, countryName = "Service" }: AddFundsModalProps) {
-  const [amount, setAmount] = useState<string>("");
+export function AddFundsModal({ isOpen, onClose, pricePerDay = 0.05, countryName, serviceCode }: AddFundsModalProps) {
+  const [amount, setAmount] = useState<any>(1);
   const [selectedPackage, setSelectedPackage] = useState<string>("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState<string>("");
 
   // Credit packages (số lượng credits) - tính giá dựa trên pricePerDay
   const packages = [
@@ -68,12 +72,38 @@ export function AddFundsModal({ isOpen, onClose, pricePerDay = 0.05, countryName
     }
   };
 
-  const handleBuy = () => {
+  const handleBuy = async () => {
     const total = calculateTotal();
-    console.log("Buying:", total);
-    // TODO: Implement payment logic
-    alert(`Processing payment for $${total.price} (${total.totalCredits} credits)`);
-    onClose();
+    setIsProcessing(true);
+    setPaymentError("");
+
+    try {
+      // Gọi API thanh toán
+      const paymentData = {
+        serviceCode: serviceCode,
+        countryCode: countryName,
+        totalCost: total.price,
+        rentDuration: total.totalCredits, // Sử dụng credits làm duration
+      };
+
+      console.log("Processing payment:", paymentData);
+
+      const response = await apiServices.post("/otp", paymentData);
+
+      if (response.data) {
+        console.log("Payment successful:", response.data);
+        alert(`Payment successful! You received ${total.totalCredits} credits.`);
+        onClose();
+
+        // Refresh user balance (có thể gọi lại API user info)
+        window.location.reload();
+      }
+    } catch (error: any) {
+      console.error("Payment error:", error);
+      setPaymentError(error.response?.data?.message || "Payment failed. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -170,6 +200,13 @@ export function AddFundsModal({ isOpen, onClose, pricePerDay = 0.05, countryName
             </div>
           </div>
 
+          {/* Error Message */}
+          {paymentError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-600">{paymentError}</p>
+            </div>
+          )}
+
           {/* Payment Methods */}
           <div>
             <h3 className="text-sm font-medium mb-3">Payment Method</h3>
@@ -196,9 +233,16 @@ export function AddFundsModal({ isOpen, onClose, pricePerDay = 0.05, countryName
           </Button>
           <Button
             onClick={handleBuy}
-            disabled={!amount || parseFloat(amount) <= 0}
+            disabled={!amount || parseFloat(amount) <= 0 || isProcessing}
             className="flex-1">
-            Buy {total.totalCredits.toLocaleString()} Credits - ${total.price.toFixed(2)}
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Processing...
+              </>
+            ) : (
+              `Buy ${total.totalCredits.toLocaleString()} Credits - $${total.price.toFixed(2)}`
+            )}
           </Button>
         </div>
       </div>
