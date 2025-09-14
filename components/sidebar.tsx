@@ -219,9 +219,6 @@ export function Sidebar() {
             API Error: {error}
           </div>
         )}
-        <div className="mt-4 text-xs text-gray-400 cursor-pointer hover:text-gray-600 transition-colors">
-          Click here to view all services
-        </div>
       </div>
 
       {/* Country Selection */}
