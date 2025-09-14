@@ -2,63 +2,59 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Star, Volume2, Copy, RefreshCw } from "lucide-react";
-import apiServices from "@/services/axios";
-
-interface Order {
-  id: string;
-  service: string;
-  phoneNumber: string;
-  activationCode: string;
-  status: "active" | "completed" | "expired";
-  createdAt: string;
-  expiresAt: string;
-}
+import { useOrdersContext } from "@/contexts/orders-context";
+import { fetchOrders } from "@/services/orders-api";
 
 export function OrdersTable() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    orders,
+    loading,
+    error,
+    totalPages,
+    totalElements,
+    setOrders,
+    setLoading,
+    setError,
+    setTotalPages,
+    setTotalElements,
+  } = useOrdersContext();
+  const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
+  const loadOrders = async () => {
     setLoading(true);
     setError(null);
-    try {
-      // Mock data for now - replace with actual API call
-      const mockOrders: Order[] = [
-        {
-          id: "1",
-          service: "WhatsApp",
-          phoneNumber: "+1 234 567 8900",
-          activationCode: "123456",
-          status: "active",
-          createdAt: "2024-01-15T10:30:00Z",
-          expiresAt: "2024-01-15T11:30:00Z",
-        },
-        {
-          id: "2",
-          service: "Telegram",
-          phoneNumber: "+44 20 7946 0958",
-          activationCode: "789012",
-          status: "completed",
-          createdAt: "2024-01-15T09:15:00Z",
-          expiresAt: "2024-01-15T10:15:00Z",
-        },
-      ];
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setOrders(mockOrders);
-    } catch (error) {
-      console.error("Error fetching orders:", error);
+    try {
+      const result = await fetchOrders(currentPage, 10);
+
+      if (result.error) {
+        setError(result.error);
+        setOrders([]);
+      } else {
+        setOrders(result.orders);
+        setTotalPages(result.totalPages);
+        setTotalElements(result.totalElements);
+      }
+    } catch (err: any) {
       setError("Failed to fetch orders");
+      console.error("Error fetching orders:", err);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
   };
+
+  // Load orders on mount
+  useEffect(() => {
+    loadOrders();
+  }, []); // Only run once on mount
+
+  // Load orders when page changes
+  useEffect(() => {
+    if (currentPage > 1) {
+      loadOrders();
+    }
+  }, [currentPage]); // Only when page changes
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -66,7 +62,7 @@ export function OrdersTable() {
   };
 
   const handleRefresh = () => {
-    fetchOrders();
+    loadOrders();
   };
 
   const getStatusColor = (status: string) => {
@@ -141,7 +137,7 @@ export function OrdersTable() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={fetchOrders}
+                        // onClick={fetchOrders}
                         className="mt-2">
                         Try Again
                       </Button>
@@ -216,6 +212,16 @@ export function OrdersTable() {
             </tbody>
           </table>
         </div>
+
+        {/* Order Summary */}
+        {orders.length > 0 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t">
+            <div className="text-sm text-muted-foreground">Showing {orders.length} orders</div>
+            <div className="text-sm text-muted-foreground">
+              Total cost: ${orders.reduce((sum, order) => sum + (order.cost || 0), 0).toFixed(2)}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

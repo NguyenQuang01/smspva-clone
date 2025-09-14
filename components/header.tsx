@@ -13,44 +13,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import apiServices from "@/services/axios";
+import { useUserContext } from "@/contexts/user-context";
 
 export function Header() {
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, isLoggedIn, userBalance, loading, fetchUserInfo, setUser, setIsLoggedIn, setUserBalance } =
+    useUserContext();
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [userBalance, setUserBalance] = useState<string>("0.00");
-  const [loading, setLoading] = useState(false);
-
-  // Fetch user info from API
-  const fetchUserInfo = async () => {
-    try {
-      setLoading(true);
-      const response = await apiServices.get("/users/info");
-
-      if (response.data) {
-        setUser(response.data);
-        setUserBalance(response.data.balanceAmount || "0.00");
-        setIsLoggedIn(true);
-
-        // Update localStorage with fresh data
-        localStorage.setItem("user", JSON.stringify(response.data));
-      }
-    } catch (error) {
-      console.error("Error fetching user info:", error);
-      // Fallback to localStorage data
-      const userData = localStorage.getItem("user");
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-        setUserBalance(parsedUser.balanceAmount || "0.00");
-        setIsLoggedIn(true);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     // Kiểm tra trạng thái đăng nhập khi component mount
@@ -60,13 +30,13 @@ export function Header() {
     if (token && userData) {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
-      setUserBalance(parsedUser.balance || "0.00");
+      setUserBalance(parsedUser.balanceAmount || "0.00");
       setIsLoggedIn(true);
 
       // Fetch fresh user info from API
       fetchUserInfo();
     }
-  }, []);
+  }, [fetchUserInfo]);
 
   // Đóng dropdown khi click bên ngoài
   useEffect(() => {

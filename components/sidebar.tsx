@@ -7,18 +7,64 @@ import { Search, Settings } from "lucide-react";
 import Link from "next/link";
 import apiServices, { apiUrl } from "@/services/axios";
 import Image from "next/image";
-import { AddFundsModal } from "@/components/add-funds-modal";
-
+import { useOrdersContext } from "@/contexts/orders-context";
+import { useUserContext } from "@/contexts/user-context";
+import { message } from "antd";
 export function Sidebar() {
   const [services, setServices] = useState<any[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [countriesLoading, setCountriesLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>("");
   const [countriesError, setCountriesError] = useState<string | null>(null);
-  const [showAddFundsModal, setShowAddFundsModal] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState<any>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Get orders context để có thể refresh orders
+  const { refreshOrders } = useOrdersContext();
+
+  // Get user context để có thể refresh user info
+  const { fetchUserInfo } = useUserContext();
+
+  // Function to handle payment
+  const handleAddFunds = async (country: any) => {
+    setIsProcessing(true);
+    try {
+      const paymentData = {
+        type: "buy.otp.service",
+        countryCode: country.countryCode,
+        totalCost: country.pricePerDay || 0.1,
+        rentDuration: 1, // Default duration
+        provider: "",
+        platForm: "api",
+        statusCode: "SUCCESS",
+        serviceCodes: [selectedService.code], // Default services
+      };
+
+      console.log("Processing payment:", paymentData);
+
+      const response = await apiServices.post("/otp", paymentData);
+      console.log("🚀 ~ handleAddFunds ~ response:", response);
+
+      if (response.data) {
+        console.log("Payment successful:", response.data);
+
+        // Refresh orders data
+        await refreshOrders();
+
+        // Refresh user info
+        await fetchUserInfo();
+      }
+      if (response.status === 500) {
+        message.error(response.data?.message || "Payment failed. Please try again.");
+      }
+    } catch (error: any) {
+      console.error("Payment error:", error);
+      alert(error.response?.data?.message || "Payment failed. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -237,12 +283,10 @@ export function Sidebar() {
 
                     <Button
                       size="sm"
-                      onClick={() => {
-                        setSelectedCountry(country);
-                        setShowAddFundsModal(true);
-                      }}
-                      className="h-8 px-4 text-xs bg-primary hover:bg-primary/90 transition-all duration-200 hover:scale-105 shadow-sm">
-                      Add funds
+                      onClick={() => handleAddFunds(country)}
+                      disabled={isProcessing}
+                      className="h-8 px-4 text-xs bg-primary hover:bg-primary/90 transition-all duration-200 hover:scale-105 shadow-sm disabled:opacity-50">
+                      {isProcessing ? "Processing..." : "Add funds"}
                     </Button>
                   </div>
                 </div>
@@ -251,15 +295,6 @@ export function Sidebar() {
           </div>
         </div>
       </div>
-
-      {/* Add Funds Modal */}
-      <AddFundsModal
-        isOpen={showAddFundsModal}
-        onClose={() => setShowAddFundsModal(false)}
-        pricePerDay={selectedCountry?.pricePerDay || 0.05}
-        countryName={selectedCountry?.countryCode}
-        serviceCode={selectedService?.code}
-      />
     </div>
   );
 }
