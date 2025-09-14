@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import apiServices from "@/services/axios";
-
 export function SignIn() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -32,17 +31,20 @@ export function SignIn() {
 
     try {
       const response = await apiServices.post("/users/login", formData);
-      console.log("Login successful:", response.data);
 
       // Lưu thông tin user và token vào localStorage
       if (response.data) {
         localStorage.setItem("token", response.data.accessToken);
         localStorage.setItem("refreshToken", response.data.refreshToken);
         localStorage.setItem("user", JSON.stringify(response.data.username));
+        window.location.href = "/";
+      }
+      if (response.status === 500) {
+        setError("Invalid username or password. Please try again.");
+        return;
       }
 
       // Reload trang để cập nhật header
-      window.location.href = "/";
     } catch (err: any) {
       console.error("Login error:", err);
       setError(err.response?.data?.message || "Login failed. Please try again.");
