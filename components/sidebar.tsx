@@ -19,12 +19,92 @@ export function Sidebar() {
   const [error, setError] = useState<string | null>("");
   const [countriesError, setCountriesError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   // Get orders context để có thể refresh orders
   const { refreshOrders } = useOrdersContext();
 
   // Get user context để có thể refresh user info
   const { fetchUserInfo } = useUserContext();
+
+  // Function to fetch all services
+  const fetchServices = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiServices.get("services");
+
+      // Kiểm tra nếu response có lỗi
+      if (response.status && response.status >= 400) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText || "Server Error"}`);
+      }
+
+      const data = response.data || response;
+
+      // Xử lý response có thể có cấu trúc khác nhau
+      if (Array.isArray(data)) {
+        setServices(data);
+      } else if (data && Array.isArray(data.data)) {
+        setServices(data.data);
+      } else if (data && Array.isArray(data.services)) {
+        setServices(data.services);
+      } else {
+        console.warn("Unexpected services data structure:", data);
+        setServices([]);
+      }
+    } catch (err: any) {
+      console.error("Error fetching services:", err);
+      setError(err.message || "Failed to fetch services");
+      setServices([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to search services
+  const searchServices = async (query: string) => {
+    if (!query.trim()) {
+      // If search is empty, load all services
+      fetchServices();
+      return;
+    }
+
+    setIsSearching(true);
+    setError(null);
+
+    try {
+      const response = await apiServices.get(`/services/search?name=${encodeURIComponent(query)}`);
+      console.log("Search results:", response.data);
+
+      if (response.data && Array.isArray(response.data)) {
+        setServices(response.data);
+      } else {
+        setServices([]);
+      }
+    } catch (err: any) {
+      console.error("Search error:", err);
+      setError("Search failed. Please try again.");
+      setServices([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Handle search input change with debounce
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+  };
+
+  // Debounce effect for search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      searchServices(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   // Function to handle payment
   const handleAddFunds = async (country: any) => {
@@ -67,61 +147,6 @@ export function Sidebar() {
   };
 
   useEffect(() => {
-    const fetchServices = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await apiServices.get("services");
-
-        // Kiểm tra nếu response có lỗi
-        if (response.status && response.status >= 400) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText || "Server Error"}`);
-        }
-
-        const data = response.data || response;
-
-        // Xử lý response có thể có cấu trúc khác nhau
-        if (Array.isArray(data)) {
-          setServices(data);
-        } else if (data.data && Array.isArray(data.data)) {
-          setServices(data.data);
-        } else if (data.services && Array.isArray(data.services)) {
-          setServices(data.services);
-        } else {
-          console.warn("Unexpected API response structure:", data);
-          throw new Error("Invalid API response structure");
-        }
-      } catch (error) {
-        console.error("Error fetching services:", error);
-        setError(error instanceof Error ? error.message : "Failed to fetch services");
-
-        // Fallback to default services
-        setServices([
-          { id: 1, name: "WhatsApp", icon: "📱", active: true },
-          { id: 2, name: "Telegram", icon: "✈️" },
-          { id: 3, name: "Instagram", icon: "📷" },
-          { id: 4, name: "Viber", icon: "💜" },
-          { id: 5, name: "VK", icon: "🔵" },
-          { id: 6, name: "Facebook", icon: "📘" },
-          { id: 7, name: "Twitter", icon: "🐦" },
-          { id: 8, name: "Gmail", icon: "📧" },
-          { id: 9, name: "Yahoo", icon: "🟣" },
-          { id: 10, name: "Skype", icon: "💙" },
-          { id: 11, name: "Line", icon: "💚" },
-          { id: 12, name: "Amazon", icon: "🛒" },
-          { id: 13, name: "Apple", icon: "🍎" },
-          { id: 14, name: "Microsoft", icon: "🪟" },
-          { id: 15, name: "Discord", icon: "🎮" },
-          { id: 16, name: "TikTok", icon: "🎵" },
-          { id: 17, name: "Snapchat", icon: "👻" },
-          { id: 18, name: "LinkedIn", icon: "💼" },
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchServices();
   }, []);
 
@@ -178,8 +203,22 @@ export function Sidebar() {
       {/* Service Selection */}
       <div className="p-6 border-b border-sidebar-border flex-shrink-0">
         <h3 className="text-sm font-medium text-sidebar-foreground mb-4 uppercase tracking-wide">Select service</h3>
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search services..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="pl-10 bg-input border-border text-foreground focus:border-primary transition-colors"
+          />
+          {isSearching && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+        </div>
         <div className="grid grid-cols-3 gap-3 max-h-64 overflow-y-auto pr-2">
-          {loading
+          {loading || isSearching
             ? // Loading skeleton
               Array.from({ length: 6 }).map((_, index) => (
                 <div
@@ -214,9 +253,10 @@ export function Sidebar() {
                 </button>
               ))}
         </div>
-        {error && (
-          <div className="mt-4 p-2 bg-gray-50 border border-gray-200 text-gray-600 text-xs rounded">
-            API Error: {error}
+        {error && <div className="mt-4 p-2 bg-red-50 border border-red-200 text-red-600 text-xs rounded">{error}</div>}
+        {!loading && !isSearching && services.length === 0 && searchQuery && (
+          <div className="mt-4 p-2 bg-gray-50 border border-gray-200 text-gray-600 text-xs rounded text-center">
+            No services found for "{searchQuery}"
           </div>
         )}
       </div>
