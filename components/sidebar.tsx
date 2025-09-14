@@ -7,6 +7,7 @@ import { Search, Settings } from "lucide-react";
 import Link from "next/link";
 import apiServices, { apiUrl } from "@/services/axios";
 import Image from "next/image";
+import { AddFundsModal } from "@/components/add-funds-modal";
 
 export function Sidebar() {
   const [services, setServices] = useState<any[]>([]);
@@ -16,6 +17,8 @@ export function Sidebar() {
   const [countriesLoading, setCountriesLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [countriesError, setCountriesError] = useState<string | null>(null);
+  const [showAddFundsModal, setShowAddFundsModal] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<any>(null);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -233,6 +236,10 @@ export function Sidebar() {
 
                     <Button
                       size="sm"
+                      onClick={() => {
+                        setSelectedCountry(country);
+                        setShowAddFundsModal(true);
+                      }}
                       className="h-8 px-4 text-xs bg-primary hover:bg-primary/90 transition-all duration-200 hover:scale-105 shadow-sm">
                       Add funds
                     </Button>
@@ -243,6 +250,14 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+
+      {/* Add Funds Modal */}
+      <AddFundsModal
+        isOpen={showAddFundsModal}
+        onClose={() => setShowAddFundsModal(false)}
+        pricePerDay={selectedCountry?.pricePerDay || 0.05}
+        countryName={selectedCountry?.name || "Service"}
+      />
     </div>
   );
 }
