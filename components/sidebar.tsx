@@ -31,7 +31,6 @@ export function Sidebar() {
         }
 
         const data = response.data || response;
-        console.log("Parsed data:", data);
 
         // Xử lý response có thể có cấu trúc khác nhau
         if (Array.isArray(data)) {

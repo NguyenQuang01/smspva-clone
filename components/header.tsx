@@ -34,6 +34,13 @@ export function Header() {
   // Đóng dropdown khi click bên ngoài
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+
+      // Don't close if clicking on dropdown content
+      if (target.closest(".dropdown-content")) {
+        return;
+      }
+
       if (showLangDropdown || showUserDropdown) {
         setShowLangDropdown(false);
         setShowUserDropdown(false);
@@ -47,12 +54,27 @@ export function Header() {
   }, [showLangDropdown, showUserDropdown]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
-    setUser(null);
-    setIsLoggedIn(false);
-    window.location.href = "/";
+    console.log("handleLogout called"); // Debug log
+    try {
+      // Clear all tokens and user data
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+
+      // Update state
+      setUser(null);
+      setIsLoggedIn(false);
+      setShowUserDropdown(false);
+
+      console.log("Logout successful, redirecting...");
+
+      // Redirect to home page
+      setTimeout(() => {
+        window.location.href = "/sign-in";
+      }, 100);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   return (
@@ -195,7 +217,7 @@ export function Header() {
                   <ChevronDown className="w-3 h-3" />
                 </Button>
                 {showUserDropdown && (
-                  <div className="absolute right-0 top-full mt-1 w-48 bg-white border shadow-lg rounded-md z-50">
+                  <div className="absolute right-0 top-full mt-1 w-48 bg-white border shadow-lg rounded-md z-50 dropdown-content">
                     <div className="py-1">
                       <div className="flex items-center space-x-2 px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">
                         <User className="w-4 h-4" />
@@ -203,12 +225,18 @@ export function Header() {
                       </div>
                       <div className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer">Settings</div>
                       <div className="border-t my-1"></div>
-                      <div
-                        className="flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer"
-                        onClick={handleLogout}>
+                      <button
+                        type="button"
+                        className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer text-left"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log("Logout button clicked");
+                          handleLogout();
+                        }}>
                         <LogOut className="w-4 h-4" />
                         <span>Logout</span>
-                      </div>
+                      </button>
                     </div>
                   </div>
                 )}
