@@ -114,7 +114,7 @@ export function Sidebar() {
         type: "buy.otp.service",
         countryCode: country.countryCode,
         totalCost: country.pricePerDay || 0.1,
-        rentDuration: 1, // Default duration
+        rentDuration: 2, // Default duration
         provider: "",
         platForm: "api",
         statusCode: "SUCCESS",

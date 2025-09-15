@@ -87,7 +87,7 @@ const transformApiDataToOrders = (apiData: ApiResponse): Order[] => {
 
 // Main function to fetch orders
 export const fetchOrders = async (
-  page: number = 1,
+  page: number = 0,
   size: number = 10
 ): Promise<{
   orders: Order[];

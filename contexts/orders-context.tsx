@@ -31,7 +31,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
-      const result = await fetchOrders(1, 10);
+      const result = await fetchOrders(0, 10);
 
       if (result.error) {
         setError(result.error);

@@ -1,107 +1,145 @@
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AlertTriangle, Star } from "lucide-react"
+"use client";
 
-const services = [
-  { name: "OTHER", price: "from $0.05", available: true, icon: "🔵" },
-  { name: "Facebook", price: "from $0.10", available: true, icon: "📘" },
-  { name: "ROZETKA", price: "from $0.05", available: true, icon: "🛒" },
-  { name: "Binance", price: "from $0.15", available: true, icon: "⚡" },
-  { name: "Telegram", price: "from $0.05", available: true, icon: "✈️" },
-  { name: "Tinder & Badoo & similar", price: "from $0.15", available: true, icon: "❤️" },
-  { name: "Uber & UberEats & similar", price: "from $0.10", available: true, icon: "🚗" },
-  { name: "Viber", price: "from $0.05", available: true, icon: "💜" },
-  { name: "Instagram", price: "from $0.10", available: true, icon: "📷" },
-  { name: "Airbnb", price: "from $0.15", available: true, icon: "🏠" },
-  { name: "WhatsApp", price: "from $0.10", available: true, icon: "💚" },
-  { name: "Skype", price: "from $0.05", available: true, icon: "🔵" },
-  { name: "Alibaba Group", price: "from $0.10", available: true, icon: "🛍️" },
-  { name: "Amazon", price: "from $0.15", available: true, icon: "📦" },
-  { name: "Apple", price: "from $0.20", available: true, icon: "🍎" },
-  { name: "Google", price: "from $0.10", available: true, icon: "🔍" },
-  { name: "Microsoft", price: "from $0.15", available: true, icon: "🪟" },
-  { name: "Twitter", price: "from $0.10", available: true, icon: "🐦" },
-  { name: "LinkedIn", price: "from $0.15", available: true, icon: "💼" },
-  { name: "Discord", price: "from $0.10", available: true, icon: "🎮" },
-  { name: "TikTok", price: "from $0.15", available: true, icon: "🎵" },
-  { name: "Snapchat", price: "from $0.10", available: true, icon: "👻" },
-  { name: "Netflix", price: "from $0.20", available: true, icon: "🎬" },
-  { name: "Spotify", price: "from $0.15", available: true, icon: "🎶" },
-]
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertTriangle, Star } from "lucide-react";
+import apiServices from "@/services/axios";
+
+interface Country {
+  id: string;
+  countryCode: string;
+  countryName: string;
+  flagImage?: string;
+}
 
 export function RentNumbers() {
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("1");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        setIsLoading(true);
+        const response = await apiServices.get("/countriesHaveSim");
+
+        if (response.data) {
+          setCountries(response.data);
+          if (response.data.length > 0) {
+            setSelectedCountry(response.data[0].countryCode);
+          }
+        }
+      } catch (err: any) {
+        console.error("Error fetching countries:", err);
+        setError("Failed to load countries. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Warning Banner */}
-      <div className="bg-amber-600 text-black px-4 py-2 text-center text-sm">
-        We do not serve clients from the Russian Federation.
-      </div>
 
       <div className="container mx-auto px-4 py-6">
         {/* Tabs */}
         <div className="flex space-x-6 mb-6">
-          <Button variant="default" className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            variant="default"
+            className="bg-blue-600 hover:bg-blue-700">
             Rent number
           </Button>
-          <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            className="text-muted-foreground hover:text-foreground">
             F.A.Q
           </Button>
-          <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            className="text-muted-foreground hover:text-foreground">
             API
           </Button>
-          <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            className="text-muted-foreground hover:text-foreground">
             Archive
           </Button>
         </div>
 
-        {/* Warning Messages */}
-        <div className="space-y-2 mb-6">
-          <div className="flex items-center space-x-2 text-amber-400 text-sm">
-            <AlertTriangle className="w-4 h-4" />
-            <span>Always select numbers</span>
-          </div>
-          <div className="flex items-center space-x-2 text-amber-400 text-sm">
-            <AlertTriangle className="w-4 h-4" />
-            <span>Cancellation of numbers up to public form 10 minutes</span>
-          </div>
-          <div className="flex items-center space-x-2 text-amber-400 text-sm">
-            <AlertTriangle className="w-4 h-4" />
-            <span>Search types of numbers, priority for strong select numbers</span>
-          </div>
-        </div>
+        {/* Error Message */}
+        {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">{error}</div>}
 
         {/* Selection Controls */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div>
             <label className="block text-sm font-medium mb-2">Select country</label>
-            <Select>
+            <Select
+              value={selectedCountry}
+              onValueChange={setSelectedCountry}>
               <SelectTrigger className="bg-card border-border">
-                <SelectValue placeholder="UK, Kingdom" />
+                <SelectValue placeholder={isLoading ? "Loading countries..." : "Select a country"} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="uk">UK, Kingdom</SelectItem>
-                <SelectItem value="us">United States</SelectItem>
-                <SelectItem value="ca">Canada</SelectItem>
-                <SelectItem value="de">Germany</SelectItem>
-                <SelectItem value="fr">France</SelectItem>
+                {isLoading ? (
+                  <SelectItem
+                    value="loading"
+                    disabled>
+                    Loading countries...
+                  </SelectItem>
+                ) : error ? (
+                  <SelectItem
+                    value="error"
+                    disabled>
+                    Error loading countries
+                  </SelectItem>
+                ) : (
+                  countries.map((country) => (
+                    <SelectItem
+                      key={country.id}
+                      value={country.countryCode}>
+                      {country.flagImage && <span className="mr-2">🏳️</span>}
+                      {country.countryName}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">Select rental period</label>
-            <Select>
-              <SelectTrigger className="bg-card border-border">
-                <SelectValue placeholder="4 hours" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1h">1 hour</SelectItem>
-                <SelectItem value="4h">4 hours</SelectItem>
-                <SelectItem value="24h">24 hours</SelectItem>
-                <SelectItem value="7d">7 days</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex space-x-2">
+              <Select
+                value={selectedPeriod}
+                onValueChange={setSelectedPeriod}>
+                <SelectTrigger className="bg-card border-border">
+                  <SelectValue placeholder="1" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="7">7</SelectItem>
+                  <SelectItem value="30">30</SelectItem>
+                  <SelectItem value="90">90</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select>
+                <SelectTrigger className="bg-card border-border">
+                  <SelectValue placeholder="week(s)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="day">day(s)</SelectItem>
+                  <SelectItem value="week">week(s)</SelectItem>
+                  <SelectItem value="month">month(s)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div>
@@ -114,48 +152,46 @@ export function RentNumbers() {
           </div>
         </div>
 
-        {/* Services Grid */}
+        {/* Countries Grid */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Available Services</h3>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" className="bg-amber-500 text-black hover:bg-amber-600">
-                Most popular
-              </Button>
-              <Button variant="outline" size="sm" className="border-border text-muted-foreground bg-transparent">
-                Filter by service
-              </Button>
-            </div>
+            <h3 className="text-lg font-semibold">Available Countries</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto custom-scrollbar">
-            {services.map((service, index) => (
-              <Card key={index} className="bg-card border-border p-3 hover:bg-muted transition-colors cursor-pointer">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 flex items-center justify-center bg-muted rounded">
-                      <span className="text-lg">{service.icon}</span>
+            {isLoading ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">Loading countries...</div>
+            ) : countries.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">No countries available</div>
+            ) : (
+              countries.map((country) => (
+                <Card
+                  key={country.id}
+                  className={`bg-card border-border p-3 hover:bg-muted transition-colors cursor-pointer ${
+                    selectedCountry === country.countryCode ? "ring-2 ring-blue-500" : ""
+                  }`}
+                  onClick={() => setSelectedCountry(country.countryCode)}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 flex items-center justify-center bg-muted rounded">
+                        <span className="text-lg">🏳️</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">{country.countryName}</div>
+                        <div className="text-xs text-muted-foreground">{country.countryCode}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-medium text-sm">{service.name}</div>
-                      <div className="text-xs text-muted-foreground">{service.price}</div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <Star className="w-4 h-4 text-muted-foreground hover:text-yellow-400 cursor-pointer" />
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    {service.available && <div className="w-2 h-2 bg-green-500 rounded-full"></div>}
-                    <Star className="w-4 h-4 text-muted-foreground hover:text-yellow-400 cursor-pointer" />
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            )}
           </div>
-        </div>
-
-        {/* Support Message */}
-        <div className="text-center text-sm text-muted-foreground">
-          Didn't find the service you need? Write to our support and we will add it today
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -18,7 +18,7 @@ export function OrdersTable() {
     setTotalPages,
     setTotalElements,
   } = useOrdersContext();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
 
   const loadOrders = async () => {
     setLoading(true);
