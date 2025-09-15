@@ -124,7 +124,6 @@ export function Sidebar() {
       console.log("Processing payment:", paymentData);
 
       const response = await apiServices.post("/otp", paymentData);
-      console.log("🚀 ~ handleAddFunds ~ response:", response);
 
       if (response.data) {
         console.log("Payment successful:", response.data);
