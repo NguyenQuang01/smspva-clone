@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Star, Volume2, Copy, RefreshCw } from "lucide-react";
 import { useOrdersContext } from "@/contexts/orders-context";
 import { fetchOrders } from "@/services/orders-api";
+import { CountdownTimer } from "@/components/countdown-timer";
 
 export function OrdersTable() {
   const {
@@ -112,6 +113,7 @@ export function OrdersTable() {
                 <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Service</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Phone number</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Activation code</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Expires in</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Action</th>
               </tr>
             </thead>
@@ -119,7 +121,7 @@ export function OrdersTable() {
               {loading ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="px-6 py-12 text-center">
                     <div className="flex items-center justify-center space-x-2">
                       <RefreshCw className="w-4 h-4 animate-spin" />
@@ -130,7 +132,7 @@ export function OrdersTable() {
               ) : error ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="px-6 py-12 text-center">
                     <div className="text-red-500">
                       <p>Error: {error}</p>
@@ -147,7 +149,7 @@ export function OrdersTable() {
               ) : orders.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="px-6 py-12 text-center">
                     <div className="text-muted-foreground">
                       <p className="text-lg">No active orders</p>
@@ -187,6 +189,9 @@ export function OrdersTable() {
                           <Copy className="w-3 h-3" />
                         </Button>
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <CountdownTimer expiresAt={order.expiresAt} />
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
