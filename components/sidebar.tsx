@@ -10,6 +10,7 @@ import Image from "next/image";
 import { useOrdersContext } from "@/contexts/orders-context";
 import { useUserContext } from "@/contexts/user-context";
 import { message } from "antd";
+import { checkBalanceAndRedirect } from "@/lib/balance-utils";
 export function Sidebar() {
   const [services, setServices] = useState<any[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
@@ -26,7 +27,7 @@ export function Sidebar() {
   const { refreshOrders } = useOrdersContext();
 
   // Get user context để có thể refresh user info
-  const { fetchUserInfo } = useUserContext();
+  const { fetchUserInfo, userBalance } = useUserContext();
 
   // Function to fetch all services
   const fetchServices = async () => {
@@ -108,12 +109,19 @@ export function Sidebar() {
 
   // Function to handle payment
   const handleAddFunds = async (country: any) => {
+    const totalCost = country.pricePerDay || 0.1;
+
+    // Check balance before proceeding with payment
+    if (!checkBalanceAndRedirect(userBalance, totalCost)) {
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const paymentData = {
         type: "buy.otp.service",
         countryCode: country.countryCode,
-        totalCost: country.pricePerDay || 0.1,
+        totalCost: totalCost,
         rentDuration: 2, // Default duration
         provider: "",
         platForm: "api",
@@ -139,7 +147,7 @@ export function Sidebar() {
       }
     } catch (error: any) {
       console.error("Payment error:", error);
-      alert(error.response?.data?.message || "Payment failed. Please try again.");
+      message.error(error.response?.data?.message || "Payment failed. Please try again.");
     } finally {
       setIsProcessing(false);
     }

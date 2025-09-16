@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertTriangle, Star } from "lucide-react";
+import { message } from "antd";
 import apiServices from "@/services/axios";
+import { useUserContext } from "@/contexts/user-context";
+import { checkBalanceAndRedirect } from "@/lib/balance-utils";
 
 interface Country {
   id: string;
@@ -27,6 +30,7 @@ interface Service {
 }
 
 export function RentNumbers() {
+  const { userBalance } = useUserContext();
   const [countries, setCountries] = useState<Country[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
@@ -119,12 +123,18 @@ export function RentNumbers() {
 
   const handleRentNumber = async () => {
     if (selectedServices.length === 0) {
-      alert("Please select at least one service");
+      message.error("Please select at least one service");
       return;
     }
 
     if (!selectedCountry) {
-      alert("Please select a country");
+      message.error("Please select a country");
+      return;
+    }
+
+    // Check balance before proceeding with payment
+    const totalCost = calculateTotalCost();
+    if (!checkBalanceAndRedirect(userBalance, totalCost)) {
       return;
     }
 
@@ -146,18 +156,18 @@ export function RentNumbers() {
 
       if (response.data) {
         console.log("Rent payment successful:", response.data);
-        alert("Rent number successful!");
+        message.success("Rent number successful!");
 
         // Clear selected services after successful payment
         setSelectedServices([]);
       }
 
       if (response.status === 500) {
-        alert(response.data?.message || "Rent payment failed. Please try again.");
+        message.error(response.data?.message || "Rent payment failed. Please try again.");
       }
     } catch (error: any) {
       console.error("Rent payment error:", error);
-      alert(error.response?.data?.message || "Rent payment failed. Please try again.");
+      message.error(error.response?.data?.message || "Rent payment failed. Please try again.");
     }
   };
 
