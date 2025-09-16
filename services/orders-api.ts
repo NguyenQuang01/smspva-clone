@@ -26,7 +26,8 @@ export interface ApiOrder {
 }
 
 export interface ApiResponse {
-  "buy.otp.service": ApiOrder[];
+  "buy.otp.service"?: ApiOrder[];
+  "rent.otp.service"?: ApiOrder[];
 }
 
 export interface Order {
@@ -63,24 +64,45 @@ const mapApiStatusToOrderStatus = (apiStatus: string): "active" | "completed" | 
 
 // Transform API data to our Order interface
 const transformApiDataToOrders = (apiData: ApiResponse): Order[] => {
-  const ordersData = apiData["buy.otp.service"];
   const transformedOrders: Order[] = [];
 
-  ordersData.forEach((apiOrder: ApiOrder) => {
-    apiOrder.stock.forEach((stockItem: StockItem, index: number) => {
-      transformedOrders.push({
-        id: `${apiOrder.id}-${index}`, // Unique ID for each stock item
-        service: stockItem.serviceCode,
-        phoneNumber: stockItem.phone,
-        activationCode: stockItem.messages?.code || "N/A",
-        status: mapApiStatusToOrderStatus(apiOrder.statusCode),
-        createdAt: apiOrder.createdAt,
-        expiresAt: stockItem.expiredAt,
-        cost: apiOrder.cost,
-        countryCode: apiOrder.countryCode,
+  // Handle buy.otp.service orders
+  if (apiData["buy.otp.service"]) {
+    apiData["buy.otp.service"].forEach((apiOrder: ApiOrder) => {
+      apiOrder.stock.forEach((stockItem: StockItem, index: number) => {
+        transformedOrders.push({
+          id: `${apiOrder.id}-${index}`, // Unique ID for each stock item
+          service: stockItem.serviceCode,
+          phoneNumber: stockItem.phone,
+          activationCode: stockItem.messages?.code || "N/A",
+          status: mapApiStatusToOrderStatus(apiOrder.statusCode),
+          createdAt: apiOrder.createdAt,
+          expiresAt: stockItem.expiredAt,
+          cost: apiOrder.cost,
+          countryCode: apiOrder.countryCode,
+        });
       });
     });
-  });
+  }
+
+  // Handle rent.otp.service orders
+  if (apiData["rent.otp.service"]) {
+    apiData["rent.otp.service"].forEach((apiOrder: ApiOrder) => {
+      apiOrder.stock.forEach((stockItem: StockItem, index: number) => {
+        transformedOrders.push({
+          id: `${apiOrder.id}-${index}`, // Unique ID for each stock item
+          service: stockItem.serviceCode,
+          phoneNumber: stockItem.phone,
+          activationCode: stockItem.messages?.code || "N/A",
+          status: mapApiStatusToOrderStatus(apiOrder.statusCode),
+          createdAt: apiOrder.createdAt,
+          expiresAt: stockItem.expiredAt,
+          cost: apiOrder.cost,
+          countryCode: apiOrder.countryCode,
+        });
+      });
+    });
+  }
 
   return transformedOrders;
 };
@@ -98,7 +120,7 @@ export const fetchOrders = async (
   try {
     const response = await apiServices.get(`/otp/order?page=${page}&size=${size}`);
 
-    if (response.data && response.data["buy.otp.service"]) {
+    if (response.data && (response.data["buy.otp.service"] || response.data["rent.otp.service"])) {
       const apiData: ApiResponse = response.data;
       const transformedOrders = transformApiDataToOrders(apiData);
 

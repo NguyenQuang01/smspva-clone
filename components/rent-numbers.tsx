@@ -96,8 +96,11 @@ export function RentNumbers() {
         // Remove if already selected
         return prev.filter((s) => s.serviceCode !== service.serviceCode);
       } else {
-        // Add if not selected
-        return [...prev, service];
+        // Add if not selected, but only if we haven't reached the maximum of 3
+        if (prev.length < 3) {
+          return [...prev, service];
+        }
+        return prev; // Don't add if already at maximum
       }
     });
   };
@@ -306,6 +309,7 @@ export function RentNumbers() {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Available Services</h3>
+            <div className="text-sm text-muted-foreground">{selectedServices.length}/3 selected</div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto custom-scrollbar">
@@ -318,13 +322,14 @@ export function RentNumbers() {
             ) : (
               services.map((service) => {
                 const isSelected = selectedServices.some((s) => s.serviceCode === service.serviceCode);
+                const isMaxReached = selectedServices.length >= 3 && !isSelected;
                 return (
                   <Card
                     key={service.serviceCode}
-                    className={`bg-card border-border m-1 p-3 hover:bg-muted transition-colors cursor-pointer ${
-                      isSelected ? "ring-2 ring-teal-500 bg-teal-50" : ""
-                    }`}
-                    onClick={() => handleServiceClick(service)}>
+                    className={`bg-card border-border m-1 p-3 transition-colors ${
+                      isMaxReached ? "opacity-50 cursor-not-allowed" : "hover:bg-muted cursor-pointer"
+                    } ${isSelected ? "ring-2 ring-teal-500 bg-teal-50" : ""}`}
+                    onClick={() => !isMaxReached && handleServiceClick(service)}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 flex items-center justify-center bg-muted rounded">
