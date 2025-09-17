@@ -29,6 +29,34 @@ export function Sidebar() {
   // Get user context để có thể refresh user info
   const { fetchUserInfo, userBalance } = useUserContext();
 
+  // Token storage utilities
+  const TokenStorage = {
+    getAccessToken: (): string | null => {
+      if (typeof window !== "undefined") {
+        return localStorage.getItem("token");
+      }
+      return null;
+    },
+    getRefreshToken: (): string | null => {
+      if (typeof window !== "undefined") {
+        return localStorage.getItem("refreshToken");
+      }
+      return null;
+    },
+    setTokens: (accessToken: string, refreshToken: string): void => {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+      }
+    },
+    clearTokens: (): void => {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+      }
+    },
+  };
+
   // Function to fetch all services
   const fetchServices = async () => {
     setLoading(true);
@@ -110,7 +138,16 @@ export function Sidebar() {
   // Function to handle payment
   const handleAddFunds = async (country: any) => {
     const totalCost = country.pricePerDay || 0.1;
+    const refreshToken = TokenStorage.getRefreshToken();
 
+    if (!refreshToken) {
+      TokenStorage.clearTokens();
+      // Redirect to login page or handle unauthorized access
+      if (typeof window !== "undefined") {
+        window.location.href = "/sign-in";
+      }
+      return;
+    }
     // Check balance before proceeding with payment
     if (!checkBalanceAndRedirect(userBalance, totalCost)) {
       return;
@@ -122,7 +159,7 @@ export function Sidebar() {
         type: "buy.otp.service",
         countryCode: country.countryCode,
         totalCost: totalCost,
-        rentDuration: 2, // Default duration
+        rentDuration: 10, // Default duration
         provider: "",
         platForm: "api",
         statusCode: "SUCCESS",

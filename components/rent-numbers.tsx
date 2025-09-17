@@ -36,6 +36,7 @@ export function RentNumbers() {
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("1");
+  const [selectedTimeUnit, setSelectedTimeUnit] = useState<string>("day");
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingServices, setIsLoadingServices] = useState(false);
   const [error, setError] = useState("");
@@ -62,7 +63,33 @@ export function RentNumbers() {
 
     fetchCountries();
   }, []);
-
+  // Token storage utilities
+  const TokenStorage = {
+    getAccessToken: (): string | null => {
+      if (typeof window !== "undefined") {
+        return localStorage.getItem("token");
+      }
+      return null;
+    },
+    getRefreshToken: (): string | null => {
+      if (typeof window !== "undefined") {
+        return localStorage.getItem("refreshToken");
+      }
+      return null;
+    },
+    setTokens: (accessToken: string, refreshToken: string): void => {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+      }
+    },
+    clearTokens: (): void => {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+      }
+    },
+  };
   // Fetch services when country changes
   useEffect(() => {
     if (selectedCountry) {
@@ -111,9 +138,36 @@ export function RentNumbers() {
 
   const calculateTotalCost = () => {
     const period = parseInt(selectedPeriod);
+    const timeUnit = selectedTimeUnit;
+
+    // Convert to days based on time unit for pricing calculation
+    let totalDays = period;
+    if (timeUnit === "week") {
+      totalDays = period * 7;
+    } else if (timeUnit === "month") {
+      totalDays = period * 30; // Assuming 30 days per month
+    }
+
     return selectedServices.reduce((total, service) => {
-      return total + service.pricePerDay * period;
+      return total + service.pricePerDay * totalDays;
     }, 0);
+  };
+
+  const calculateRentDurationInMinutes = () => {
+    const period = parseInt(selectedPeriod);
+    const timeUnit = selectedTimeUnit;
+
+    // Convert to minutes based on time unit
+    let totalMinutes = period;
+    if (timeUnit === "day") {
+      totalMinutes = period * 24 * 60; // 24 hours * 60 minutes
+    } else if (timeUnit === "week") {
+      totalMinutes = period * 7 * 24 * 60; // 7 days * 24 hours * 60 minutes
+    } else if (timeUnit === "month") {
+      totalMinutes = period * 30 * 24 * 60; // 30 days * 24 hours * 60 minutes
+    }
+
+    return totalMinutes;
   };
 
   const getAvailableNumbers = () => {
@@ -122,6 +176,16 @@ export function RentNumbers() {
   };
 
   const handleRentNumber = async () => {
+    const refreshToken = TokenStorage.getRefreshToken();
+
+    if (!refreshToken) {
+      TokenStorage.clearTokens();
+      // Redirect to login page or handle unauthorized access
+      if (typeof window !== "undefined") {
+        window.location.href = "/sign-in";
+      }
+      return;
+    }
     if (selectedServices.length === 0) {
       message.error("Please select at least one service");
       return;
@@ -143,7 +207,7 @@ export function RentNumbers() {
         type: "rent.otp.service",
         countryCode: selectedCountry,
         totalCost: calculateTotalCost(),
-        rentDuration: parseInt(selectedPeriod),
+        rentDuration: calculateRentDurationInMinutes(),
         provider: "",
         platForm: "api",
         statusCode: "SUCCESS",
@@ -251,19 +315,24 @@ export function RentNumbers() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="6">6</SelectItem>
                   <SelectItem value="7">7</SelectItem>
-                  <SelectItem value="30">30</SelectItem>
-                  <SelectItem value="90">90</SelectItem>
                 </SelectContent>
               </Select>
-              <Select>
+              <Select
+                value={selectedTimeUnit}
+                onValueChange={setSelectedTimeUnit}>
                 <SelectTrigger className="bg-card border-border">
-                  <SelectValue placeholder="week(s)" />
+                  <SelectValue placeholder="day" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="day">day(s)</SelectItem>
-                  <SelectItem value="week">week(s)</SelectItem>
-                  <SelectItem value="month">month(s)</SelectItem>
+                  <SelectItem value="day">day</SelectItem>
+                  <SelectItem value="week">week</SelectItem>
+                  <SelectItem value="month">month</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -285,11 +354,21 @@ export function RentNumbers() {
                         <div className="text-xs text-muted-foreground">
                           Country:{" "}
                           {countries.find((c) => c.countryCode === selectedCountry)?.countryName || selectedCountry},
-                          For: {selectedPeriod} week(s)
+                          For: {selectedPeriod} {selectedTimeUnit}(s)
                         </div>
                       </div>
                       <div className="text-sm font-medium">
-                        ${(service.pricePerDay * parseInt(selectedPeriod)).toFixed(2)}
+                        $
+                        {(() => {
+                          const period = parseInt(selectedPeriod);
+                          let totalDays = period;
+                          if (selectedTimeUnit === "week") {
+                            totalDays = period * 7;
+                          } else if (selectedTimeUnit === "month") {
+                            totalDays = period * 30;
+                          }
+                          return (service.pricePerDay * totalDays).toFixed(2);
+                        })()}
                       </div>
                     </div>
                   ))}

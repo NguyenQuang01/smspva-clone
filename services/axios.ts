@@ -107,9 +107,9 @@ apiConfig.interceptors.response.use(
         processQueue(error, null);
         isRefreshing = false;
         // Redirect to login page or handle unauthorized access
-        if (typeof window !== "undefined") {
-          window.location.href = "/sign-in";
-        }
+        // if (typeof window !== "undefined") {
+        //   window.location.href = "/sign-in";
+        // }
         return Promise.reject(error);
       }
 
