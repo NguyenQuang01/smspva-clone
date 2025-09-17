@@ -114,7 +114,7 @@ export function OrdersTable() {
                 <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Phone number</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Activation code</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Expires in</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Action</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Type</th>
               </tr>
             </thead>
             <tbody>
@@ -194,22 +194,7 @@ export function OrdersTable() {
                       <CountdownTimer expiresAt={order.expiresAt} />
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs">
-                          View Details
-                        </Button>
-                        {order.status === "active" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-xs text-red-600 hover:text-red-700">
-                            Cancel
-                          </Button>
-                        )}
-                      </div>
+                      <div className="text-sm text-foreground">{order.type ? order.type.split(".")[0] : "N/A"}</div>
                     </td>
                   </tr>
                 ))

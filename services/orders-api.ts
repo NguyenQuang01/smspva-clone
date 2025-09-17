@@ -40,6 +40,7 @@ export interface Order {
   expiresAt: string;
   cost?: number;
   countryCode?: string;
+  type?: string;
 }
 
 // Helper function to map API status to our Order status
@@ -80,6 +81,7 @@ const transformApiDataToOrders = (apiData: ApiResponse): Order[] => {
           expiresAt: stockItem.expiredAt,
           cost: apiOrder.cost,
           countryCode: apiOrder.countryCode,
+          type: apiOrder.type,
         });
       });
     });
@@ -99,6 +101,7 @@ const transformApiDataToOrders = (apiData: ApiResponse): Order[] => {
           expiresAt: stockItem.expiredAt,
           cost: apiOrder.cost,
           countryCode: apiOrder.countryCode,
+          type: apiOrder.type,
         });
       });
     });

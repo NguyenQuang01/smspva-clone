@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://103.237.147.43:9090/api/";
+export const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://72.60.41.168:9090/api/";
 
 // Token storage utilities
 const TokenStorage = {
